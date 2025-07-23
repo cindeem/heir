@@ -1,2 +1,3 @@
 google-cloud-compute
 google-cloud-tpu
+google-cloud-logging

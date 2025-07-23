@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
+import google.cloud.logging
+import logging
 import subprocess
 import sys
 import time
@@ -13,6 +15,16 @@ from google.cloud import tpu_v2
 from provision import destroy
 from provision import provision
 
+# Initialize Cloud Logging Client
+client = google.cloud.logging.Client()
+
+# Root logger setup
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# Add Cloud Logging handler to python root logger
+handler = client.get_default_handler()
+logger.addHandler(handler)
 
 tpu_vm_cmd_pref = ["gcloud", "compute", "tpus", "tpu-vm"]
 
@@ -143,6 +155,8 @@ class Tool:
     )
     args, core = _parse_with_core(parser)
 
+    logger.info("TPU Run Executable file=%s"%(arg.main))
+
     nodes = core.list_nodes(all_zones=False)
     if args.vm is None:
       if len(nodes) == 0:
@@ -225,6 +239,8 @@ class Tool:
         ),
     )
     args, core = _parse_with_core(parser)
+    logger.info("Provision TPU vm=%s"%(args.vm))
+    logger.info("Provision TPU accel=%s"%(args.accelerator_type))
 
     provision(
         core=core,
